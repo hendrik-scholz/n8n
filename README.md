@@ -12,17 +12,31 @@ The setup in the current project uses a local n8n instance as well as a local GP
 
 ## Setup
 
-* install GPT4All
-* GPT4All enable local API server
-* install model qwen2.5-coder-1.5b-instruct-q4_0.gguf in GPT4All
-* install socat ```sudo apt install socat```
-* start socat ```socat TCP-LISTEN:4892,fork,reuseaddr TCP:127.0.0.1:4891```
-* create n8n in /home/<user>
-* start Docker ```docker-compose up```
-* replace webhookUrl in chat.html with value from trigger node
-* open chat.html in browser
+### GPT4All
 
-## Improvments
+* Install GPT4All
+* Enable local API server
+* Install model qwen2.5-coder-1.5b-instruct-q4_0.gguf in GPT4All
+
+### socat
+
+* Install socat ```sudo apt install socat```
+* Start socat ```socat TCP-LISTEN:4892,fork,reuseaddr TCP:127.0.0.1:4891```
+
+### Filesystem
+
+* Create a directory "n8n" in /home/user
+
+### Start
+
+* Start Docker: ```docker-compose up```
+* Open http://localhost:5678/home/workflows in browser
+* Open Workflow
+* Get chat URL from trigger node
+* Replace webhookUrl in chat.html with value from trigger node
+* Open chat.html in browser
+
+## Improvements
 
 * Error handling in workflow
 * Support for multiple files to extract
