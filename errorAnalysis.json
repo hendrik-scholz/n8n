@@ -1,0 +1,273 @@
+{
+  "name": "Error Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi, I'm an error analysis agent. Please provide error messages. Upload logs as ZIP file.",
+        "options": {
+          "allowFileUploads": true,
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "139a4665-8b24-4227-8e4e-395238248003",
+      "name": "When chat message received",
+      "webhookId": "d820b925-68a0-4002-a9da-d7e1938a6df1"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.choices[0].text }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        16
+      ],
+      "id": "8678fa9b-2cf9-4082-ab56-84a204aa47de",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "data0"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        176
+      ],
+      "id": "a39d5053-14d7-43f4-8d40-f4fae6fb975f",
+      "name": "Decompress"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "968bd898-6328-49c2-ae42-866be8170e90",
+              "name": "chatInput",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        0
+      ],
+      "id": "2d37f854-6b44-4d6d-86e5-199e3932b7b5",
+      "name": "Get chat message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4892/v1/completions",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "qwen2.5-coder-1.5b-instruct-q4_0.gguf"
+            },
+            {
+              "name": "prompt",
+              "value": "=List possible reasons for the following error. Use bullet points. Do no repeat the request.\n\nError: {{ $json.toJsonString() }}"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{ parseInt(200) }}"
+            },
+            {
+              "name": "temperature",
+              "value": "={{ parseFloat(0.7) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        16
+      ],
+      "id": "ef78734b-1ac7-400e-96d8-c573ba4f157c",
+      "name": "HTTP Request to GPT4All"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0838c856-95b7-46d6-8d49-f9c6443723ec",
+              "leftValue": "={{ $json.files }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        192
+      ],
+      "id": "6fff7b78-f910-4d06-b041-fbfb0e66b326",
+      "name": "Does file exist?"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=file_0",
+        "destinationKey": "log",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        656,
+        176
+      ],
+      "id": "165bf294-0486-41e2-861b-a07dd2ec7711",
+      "name": "Extract one file"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        16
+      ],
+      "id": "f54af8f5-c84a-42ed-a1eb-7fe4f96b1805",
+      "name": "Merge chat message and file content"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get chat message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Does file exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decompress": {
+      "main": [
+        [
+          {
+            "node": "Extract one file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get chat message": {
+      "main": [
+        [
+          {
+            "node": "Merge chat message and file content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request to GPT4All": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Does file exist?": {
+      "main": [
+        [
+          {
+            "node": "Decompress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract one file": {
+      "main": [
+        [
+          {
+            "node": "Merge chat message and file content",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge chat message and file content": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request to GPT4All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ab58a07d-1ed8-4d76-918a-c0774ee37e31",
+  "meta": {
+    "instanceId": "cc97cdaf812eb8bc539ac23c89edcd1a3b2195a14179ac6dca7f330892b76124"
+  },
+  "id": "Yfj4O6dZyeOEaKZf",
+  "tags": []
+}

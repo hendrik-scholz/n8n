@@ -1,0 +1,34 @@
+<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<style>
+body {
+  font-family: Arial;
+}
+p {
+  font-family: Arial;
+}
+.chat-message.chat-message-from-user {
+  background-color: #101330;
+}
+.chat-message.chat-message-from-user:not(.chat-message-transparent) {
+  background-color: #101330;
+}
+.chat-input-file-button[data-v-040531b3]  {
+  color: #101330;
+}
+.chat-input-file-button[data-v-040531b3]:hover  {
+  color: #101330;
+}
+.chat-input-send-button[data-v-040531b3] {
+  color: #101330;
+}
+</style>
+<script type="module">
+	import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+	createChat({
+		webhookUrl: 'http://localhost:5678/webhook/d820b925-68a0-4002-a9da-d7e1938a6df1/chat',
+		mode: 'fullscreen',
+    allowFileUploads: true,
+    initialMessages: ["Hi, I'm an error analysis agent. Please provide error messages as text. Upload logs as a ZIP file."]
+	});
+</script>

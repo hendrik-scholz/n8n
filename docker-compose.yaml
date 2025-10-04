@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.111.0
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=sqlite
+      - DB_SQLITE_DATABASE=/home/n8n/.n8n/n8n.db
+    extra_hosts:
+      - "host.docker.internal:192.168.178.28"
+    volumes:
+      - /home/user/n8n:/home/n8n/.n8n
