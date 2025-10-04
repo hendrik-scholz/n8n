@@ -1,6 +1,6 @@
 # n8n
 
-The setup in the current project uses a local n8n instance as well as a local GPT4All instance.
+The project setup uses a local n8n instance as well as a local GPT4All instance.
 
 ## Workflow
 
